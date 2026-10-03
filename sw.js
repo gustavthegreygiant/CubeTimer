@@ -1,6 +1,6 @@
 // Bump VERSION whenever you deploy changes so users get the new files.
-const VERSION = 'cube-timer-v1';
-const FILES = ['./', 'index.html', 'css/style.css', 'js/scrambler.js', 'js/stats.js', 'js/storage.js', 'js/timer.js', 'js/ui.js', 'js/events.js', 'js/pwa.js', 'manifest.webmanifest', 'icon.svg'];
+const VERSION = 'cube-timer-v2';
+const FILES = ['./', 'index.html', 'style.css', 'scrambler.js', 'stats.js', 'storage.js', 'timer.js', 'ui.js', 'events.js', 'pwa.js', 'manifest.webmanifest', 'icon.svg'];
 self.addEventListener('install', e => e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(k => Promise.all(k.filter(x => x !== VERSION).map(x => caches.delete(x)))).then(() => self.clients.claim())));
 self.addEventListener('fetch', e => {

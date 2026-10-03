@@ -30,7 +30,7 @@ python3 -m http.server 8000
 ```
 
 ## Deploy to GitHub Pages
-1. Push this folder to a GitHub repository.
+1. Push these files to a GitHub repository.
 2. Settings > Pages > Build and deployment > deploy from branch `main`, folder `/ (root)`.
 3. Your site appears at `https://<user>.github.io/<repo>/`.
 
@@ -39,20 +39,20 @@ When you deploy changes, bump `VERSION` in `sw.js` so returning visitors receive
 ## Project structure
 ```
 index.html          page markup
-css/style.css       styles
-js/scrambler.js     scramble engine + cube registry (add new puzzles here)
-js/stats.js         formatting, averages, statistics
-js/storage.js       localStorage, sessions, settings, PB tracking
-js/timer.js         timer + inspection state machine
-js/ui.js            rendering and dialogs
-js/events.js        keyboard / pointer wiring and startup
-js/pwa.js, sw.js    offline support
-tests/run.js        unit tests (scrambles, averages), run with Node
+style.css           styles
+scrambler.js        scramble engine + cube registry (add new puzzles here)
+stats.js            formatting, averages, statistics
+storage.js          localStorage, sessions, settings, PB tracking
+timer.js            timer + inspection state machine
+ui.js               rendering and dialogs
+events.js           keyboard / pointer wiring and startup
+pwa.js, sw.js       offline support
+run-tests.js        unit tests (scrambles, averages), run with Node
 ```
 
 ## Tests
 ```
-node tests/run.js
+node run-tests.js
 ```
 
 ## Notes
