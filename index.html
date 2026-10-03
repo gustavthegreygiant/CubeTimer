@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cube Timer</title>
+<meta name="theme-color" content="#2563eb">
+<meta name="description" content="A simple, fast speedcubing timer for 2x2, 3x3 and 4x4.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Cube Timer</h1>
+    <button id="gear" aria-label="Settings">⚙ Settings</button>
+    <div class="tabs" id="tabs"></div>
+  </header>
+  <div class="sess">
+    <select id="ss" aria-label="Session"></select>
+    <button id="sn">+ New</button><button id="sr">Rename</button><button id="sd">Delete</button>
+  </div>
+  <div id="scr" class="scr"></div>
+  <div class="c"><button id="nsb">New Scramble</button></div>
+  <div id="tz" class="tz" role="button" aria-label="Timer: hold, release to start, press to stop">
+    <div id="tm" class="tm">0.00</div><div id="sub" class="sub"></div>
+  </div>
+  <div id="pbar" hidden><button data-p="">OK</button><button data-p="+2">+2</button><button data-p="DNF">DNF</button></div>
+  <div class="quick" id="quick"></div>
+  <div class="grid">
+    <section class="p"><h2>Session Statistics</h2><div id="st" class="sg"></div></section>
+    <section class="p"><h2 id="pbh">Personal Records</h2><div id="pb"></div></section>
+    <section class="p"><h2>Time Trend</h2><div id="gr"></div></section>
+    <section class="p"><div class="hh"><h2>Solve History</h2><button id="clr">Clear Session</button></div><div class="hs"><table id="hist"></table></div></section>
+  </div>
+  <div class="foot">Space: hold → release to start, press to stop · N new scramble · Esc cancel · Del delete last · Touch: tap & hold the timer</div>
+</div>
+<div id="toast"></div>
+
+<dialog id="dlg"><form method="dialog"><p id="dmsg"></p><input id="dinp" maxlength="40" style="width:100%"><div class="btns"><button value="ok" class="pri">OK</button><button value="cancel">Cancel</button></div></form></dialog>
+
+<dialog id="sdlg"><form method="dialog">
+  <h3 style="margin-top:0">Settings</h3>
+  <label>Inspection <input type="checkbox" id="s1"></label>
+  <label>Inspection seconds <input type="number" id="s2" min="5" max="60"></label>
+  <label>Timer display <select id="s3"><option value="cs">0.01 s</option><option value="ds">0.1 s</option><option value="hide">Hidden while running</option></select></label>
+  <label>Theme <select id="s4"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <label>Sound <input type="checkbox" id="s5"></label>
+  <label>Confirm before clearing <input type="checkbox" id="s6"></label>
+  <h3>Keyboard Shortcuts</h3>
+  <ul><li><b>Space</b> hold, release to start; press to stop (with inspection: tap to begin inspection, then hold/release)</li><li><b>N</b> new scramble</li><li><b>Esc</b> cancel / reset timer</li><li><b>Delete</b> delete latest solve</li></ul>
+  <div class="btns"><button value="close" class="pri">Close</button></div>
+</form></dialog>
+
+<script src="js/scrambler.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/timer.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/events.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>
