@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cube Timer</title>
+<style>
+:root{--bg:#f7f7f5;--fg:#1b1d20;--mut:#6b7078;--line:#dfe0dd;--panel:#fff;--acc:#2563eb;--good:#16a34a;--bad:#dc2626;--warn:#d97706;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121416;--fg:#e8eaed;--mut:#8b9199;--line:#2a2e33;--panel:#1a1d21;--acc:#6ea0ff;--good:#4ade80;--bad:#f87171;--warn:#fbbf24}}
+:root[data-theme="dark"]{--bg:#121416;--fg:#e8eaed;--mut:#8b9199;--line:#2a2e33;--panel:#1a1d21;--acc:#6ea0ff;--good:#4ade80;--bad:#f87171;--warn:#fbbf24}
+html{scroll-padding-top:env(safe-area-inset-top,0px);background:var(--bg)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+.wrap{max-width:980px;margin:0 auto;padding:10px 16px 24px}
+button,select,input{font:inherit;color:inherit}
+button{min-height:44px;padding:0 16px;border:1px solid var(--line);background:var(--panel);border-radius:10px;cursor:pointer}
+button:hover{border-color:var(--mut)}
+select,input[type=number],input:not([type]){min-height:44px;padding:0 10px;border:1px solid var(--line);background:var(--panel);border-radius:10px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.top h1{font-size:18px;margin:0;flex:1 0 auto}
+.tabs{display:flex;gap:6px;order:3;width:100%}
+.tabs button{flex:1;font-weight:600;font-size:18px}
+.tabs button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.sess{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.sess select{flex:1;min-width:140px}
+.scr{font:clamp(20px,3.4vw,30px)/1.55 ui-monospace,Menlo,Consolas,monospace;text-align:center;margin:22px auto 8px;max-width:860px;word-spacing:.15em}
+.scr.long{font-size:clamp(17px,2.5vw,23px)}
+.c{text-align:center}
+.tz{height:clamp(200px,40vh,380px);display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;cursor:pointer;border-radius:16px}
+.tm{font-size:clamp(64px,19vw,168px);font-weight:600;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.02em}
+.tm.held{color:var(--bad)}.tm.ready{color:var(--good)}.tm.ins{color:var(--warn)}
+.sub{min-height:26px;color:var(--warn);font-weight:600;margin-top:8px}
+#pbar{display:flex;gap:8px;justify-content:center;margin-bottom:6px}
+#pbar button.on{background:var(--fg);color:var(--bg)}
+.quick{display:flex;justify-content:center;gap:28px;margin:10px 0 4px}
+.quick div,.sg div{text-align:center}
+.quick b,.sg b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.quick span,.sg span,.mut{color:var(--mut);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:8px 32px;margin-top:18px}
+.p{border-top:1px solid var(--line);padding:12px 0}
+.p h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:0 0 10px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:12px 6px}
+.pbr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.hh{display:flex;justify-content:space-between;align-items:center}.hh h2{margin:0}
+.hs{max-height:360px;overflow-y:auto;margin-top:8px}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th{text-align:left;color:var(--mut);font-size:12px;font-weight:500}.r{text-align:right}
+td,th{padding:2px 6px;border-bottom:1px solid var(--line)}
+td .x{min-height:40px;min-width:40px;padding:0;border:0;background:none;color:var(--mut);font-size:20px}
+.gr{width:100%;height:110px;display:block;border-bottom:1px solid var(--line)}
+.gl{display:flex;justify-content:space-between}
+.foot{margin-top:18px;color:var(--mut);font-size:13px;text-align:center}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;opacity:0;pointer-events:none;transition:opacity .25s}
+#toast.show{opacity:1}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--fg);max-width:min(420px,92vw);width:100%;padding:18px}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+.btns{display:flex;flex-direction:row-reverse;gap:8px;margin-top:14px}
+.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+dialog label{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px}
+dialog input[type=checkbox]{width:22px;height:22px}
+dialog input[type=number]{width:90px}
+dialog h3{margin:14px 0 4px;font-size:14px}
+dialog ul{margin:0;padding-left:18px;color:var(--mut);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>Cube Timer</h1>
+    <button id="gear" aria-label="Settings">⚙ Settings</button>
+    <div class="tabs" id="tabs"></div>
+  </header>
+  <div class="sess">
+    <select id="ss" aria-label="Session"></select>
+    <button id="sn">+ New</button><button id="sr">Rename</button><button id="sd">Delete</button>
+  </div>
+  <div id="scr" class="scr"></div>
+  <div class="c"><button id="nsb">New Scramble</button></div>
+  <div id="tz" class="tz" role="button" aria-label="Timer: hold, release to start, press to stop">
+    <div id="tm" class="tm">0.00</div><div id="sub" class="sub"></div>
+  </div>
+  <div id="pbar" hidden><button data-p="">OK</button><button data-p="+2">+2</button><button data-p="DNF">DNF</button></div>
+  <div class="quick" id="quick"></div>
+  <div class="grid">
+    <section class="p"><h2>Session Statistics</h2><div id="st" class="sg"></div></section>
+    <section class="p"><h2 id="pbh">Personal Records</h2><div id="pb"></div></section>
+    <section class="p"><h2>Time Trend</h2><div id="gr"></div></section>
+    <section class="p"><div class="hh"><h2>Solve History</h2><button id="clr">Clear Session</button></div><div class="hs"><table id="hist"></table></div></section>
+  </div>
+  <div class="foot">Space: hold → release to start, press to stop · N new scramble · Esc cancel · Del delete last · Touch: tap & hold the timer</div>
+</div>
+<div id="toast"></div>
+
+<dialog id="dlg"><form method="dialog"><p id="dmsg"></p><input id="dinp" maxlength="40" style="width:100%"><div class="btns"><button value="ok" class="pri">OK</button><button value="cancel">Cancel</button></div></form></dialog>
+
+<dialog id="sdlg"><form method="dialog">
+  <h3 style="margin-top:0">Settings</h3>
+  <label>Inspection <input type="checkbox" id="s1"></label>
+  <label>Inspection seconds <input type="number" id="s2" min="5" max="60"></label>
+  <label>Timer display <select id="s3"><option value="cs">0.01 s</option><option value="ds">0.1 s</option><option value="hide">Hidden while running</option></select></label>
+  <label>Theme <select id="s4"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <label>Sound <input type="checkbox" id="s5"></label>
+  <label>Confirm before clearing <input type="checkbox" id="s6"></label>
+  <h3>Keyboard Shortcuts</h3>
+  <ul><li><b>Space</b> hold, release to start; press to stop (with inspection: tap to begin inspection, then hold/release)</li><li><b>N</b> new scramble</li><li><b>Esc</b> cancel / reset timer</li><li><b>Delete</b> delete latest solve</li></ul>
+  <div class="btns"><button value="close" class="pri">Close</button></div>
+</form></dialog>
+
+<script>
+/* ============ Scramble engine (independent of UI) ============ */
+const Scrambler = (() => {
+  const rnd = n => Math.floor(Math.random() * n);
+  const AX = [['U','D'], ['R','L'], ['F','B']], SUF = ['', "'", '2'];
+  // Random-move scrambles: never the same axis twice in a row (no R R', U U2, R L R ...).
+  function gen({ len, axes = AX, wide = false }) {
+    const out = []; let last = -1;
+    for (let i = 0; i < len; i++) {
+      let a; do { a = rnd(axes.length); } while (a === last);
+      last = a;
+      const f = axes[a][rnd(axes[a].length)];
+      const w = wide && 'RUF'.includes(f) && rnd(2) ? 'w' : '';
+      out.push(f + w + SUF[rnd(3)]);
+    }
+    return out.join(' ');
+  }
+  return { gen };
+})();
+
+// Add a new puzzle here: label + scramble function.
+const CUBES = {
+  '2x2': { label: '2×2', scramble: () => Scrambler.gen({ len: 10, axes: [['R'], ['U'], ['F']] }) },
+  '3x3': { label: '3×3', scramble: () => Scrambler.gen({ len: 20 }) },
+  '4x4': { label: '4×4', scramble: () => Scrambler.gen({ len: 40, wide: true }) }
+};
+
+/* ============ Formatting + statistics ============ */
+function fmt(ms, d = 2) {
+  if (ms == null) return '—';
+  if (!isFinite(ms)) return 'DNF';
+  const per = d === 2 ? 100 : 10, t = Math.floor(ms / (d === 2 ? 10 : 100));
+  const s = Math.floor(t / per), f = String(t % per).padStart(d, '0');
+  const m = Math.floor(s / 60), ss = s % 60;
+  return m ? `${m}:${String(ss).padStart(2, '0')}.${f}` : `${ss}.${f}`;
+}
+const finalOf = (raw, pen) => pen === 'DNF' ? null : raw + (pen === '+2' ? 2000 : 0);
+
+const Stats = {
+  // f: chronological finalTimes (null = DNF). Returns ms, Infinity (DNF) or null (not enough solves)
+  avg(f, n) {
+    if (f.length < n) return null;
+    const w = f.slice(-n), tr = Math.ceil(n / 20);
+    if (w.filter(x => x == null).length > tr) return Infinity;
+    const v = w.map(x => x == null ? Infinity : x).sort((a, b) => a - b).slice(tr, n - tr);
+    return v.reduce((a, b) => a + b, 0) / v.length;
+  },
+  summary(f) {
+    const v = f.filter(x => x != null);
+    return {
+      n: f.length,
+      best: v.length ? Math.min(...v) : null,
+      worst: v.length ? Math.max(...v) : null,
+      mean: v.length ? v.reduce((a, b) => a + b, 0) / v.length : null,
+      ao5: this.avg(f, 5), ao12: this.avg(f, 12), ao50: this.avg(f, 50), ao100: this.avg(f, 100)
+    };
+  }
+};
+
+/* ============ Storage + state (sessions, PBs, settings) ============ */
+const Store = {
+  key: 'cubetimer.v1',
+  load() { try { return JSON.parse(localStorage.getItem(this.key)); } catch (e) { return null; } },
+  save(s) { try { localStorage.setItem(this.key, JSON.stringify(s)); } catch (e) {} }
+};
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const mkSession = (cube, name) => ({ id: uid(), cube, name, solves: [] });
+let S;
+function initState() {
+  const l = Store.load() || {};
+  S = {
+    cube: CUBES[l.cube] ? l.cube : '3x3',
+    settings: Object.assign({ insp: false, inspDur: 15, disp: 'cs', theme: 'system', sound: false, confirmClear: true }, l.settings),
+    sessions: Array.isArray(l.sessions) ? l.sessions : [],
+    active: l.active || {}, pbs: l.pbs || {}
+  };
+  for (const c in CUBES) {
+    S.pbs[c] = S.pbs[c] || {};
+    if (!S.sessions.some(x => x.cube === c)) S.sessions.push(mkSession(c, 'Session 1'));
+    if (!S.sessions.find(x => x.id === S.active[c])) S.active[c] = S.sessions.find(x => x.cube === c).id;
+  }
+}
+const save = () => Store.save(S);
+const cur = () => S.sessions.find(x => x.id === S.active[S.cube]);
+const PBK = [['single', 'Single'], ['ao5', 'Ao5'], ['ao12', 'Ao12'], ['ao50', 'Ao50'], ['ao100', 'Ao100']];
+function checkPBs(solves) {
+  const f = solves.map(s => s.finalTime), sm = Stats.summary(f), pb = S.pbs[S.cube], hit = [];
+  const now = { single: f[f.length - 1], ao5: sm.ao5, ao12: sm.ao12, ao50: sm.ao50, ao100: sm.ao100 };
+  for (const [k, name] of PBK) {
+    const v = now[k];
+    if (v == null || !isFinite(v)) continue;
+    if (pb[k] == null || v < pb[k]) { if (pb[k] != null) hit.push(name); pb[k] = v; }
+  }
+  return hit;
+}
+
+/* ============ Timer + inspection (performance.now timestamps only) ============ */
+const HOLD = 300;
+const ACT = new Set(['hold', 'inspect', 'inspHold', 'running']);
+// states: idle | stopped | pre | hold | inspect | inspHold | running
+const T = { s: 'idle', t0: 0, tI: 0, hold: 0, pen: '', raf: 0, last: null, beeped: false };
+let scr = '';
+const ready = () => performance.now() - T.hold >= HOLD;
+function arm() { T.hold = performance.now(); T.beeped = false; loop(); }
+function loop() {
+  cancelAnimationFrame(T.raf);
+  const f = () => { draw(); if (ACT.has(T.s)) T.raf = requestAnimationFrame(f); };
+  f();
+}
+function timerDown() {
+  const n = performance.now();
+  if (T.s === 'running') return stopTimer(n);
+  if (T.s === 'idle' || T.s === 'stopped') {
+    if (S.settings.insp) { T.s = 'pre'; draw(); } else { T.s = 'hold'; arm(); }
+  } else if (T.s === 'inspect') { T.s = 'inspHold'; arm(); }
+}
+function timerUp() {
+  if (T.s === 'pre') { T.tI = performance.now(); T.s = 'inspect'; loop(); }
+  else if (T.s === 'hold') { if (ready()) startTimer(); else { T.s = T.last ? 'stopped' : 'idle'; draw(); } }
+  else if (T.s === 'inspHold') { if (ready()) startTimer(); else { T.s = 'inspect'; loop(); } }
+}
+function startTimer() {
+  const n = performance.now();
+  if (T.s === 'inspHold') {
+    const e = (n - T.tI) / 1000, d = S.settings.inspDur;
+    T.pen = e <= d ? '' : e <= d + 2 ? '+2' : 'DNF';
+  } else T.pen = '';
+  T.t0 = n; T.s = 'running'; loop();
+}
+function stopTimer(n) {
+  cancelAnimationFrame(T.raf);
+  const raw = Math.round(n - T.t0);
+  T.s = 'stopped';
+  recordSolve(raw, T.pen);
+  beep(660, .08);
+}
+function resetTimer() { cancelAnimationFrame(T.raf); T.s = 'idle'; T.last = null; T.pen = ''; draw(); }
+function inspText() {
+  const e = (performance.now() - T.tI) / 1000, d = S.settings.inspDur;
+  return e < d ? String(Math.ceil(d - e)) : e <= d + 2 ? '+2' : 'DNF';
+}
+let ac;
+function beep(f = 880, d = .06) {
+  if (!S.settings.sound) return;
+  try {
+    ac = ac || new AudioContext();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.frequency.value = f; g.gain.value = .05; o.connect(g); g.connect(ac.destination);
+    o.start(); o.stop(ac.currentTime + d);
+  } catch (e) {}
+}
+
+/* ============ UI ============ */
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const sd = s => s.penalty === 'DNF' ? 'DNF' : fmt(s.finalTime);
+
+function draw() {
+  let txt = '0.00', cls = '', sub = '';
+  const dsp = S.settings.disp;
+  switch (T.s) {
+    case 'stopped':
+      if (T.last) {
+        txt = sd(T.last);
+        sub = T.last.penalty === 'DNF' ? 'DNF (raw ' + fmt(T.last.rawTime) + ')' : T.last.penalty ? '+2 penalty' : '';
+      }
+      break;
+    case 'pre': txt = String(S.settings.inspDur); cls = 'ins'; break;
+    case 'hold': case 'inspHold': {
+      const r = ready();
+      if (r && !T.beeped) { T.beeped = true; beep(); }
+      if (r) { txt = 'READY'; cls = 'ready'; }
+      else if (T.s === 'hold') { cls = 'held'; }
+      else { txt = inspText(); cls = 'held'; }
+      break;
+    }
+    case 'inspect': txt = inspText(); cls = 'ins'; break;
+    case 'running': txt = dsp === 'hide' ? '…' : fmt(performance.now() - T.t0, dsp === 'ds' ? 1 : 2); break;
+  }
+  $('#tm').textContent = txt; $('#tm').className = 'tm ' + cls; $('#sub').textContent = sub;
+  const show = T.s === 'stopped' && !!T.last;
+  $('#pbar').hidden = !show;
+  if (show) document.querySelectorAll('#pbar button').forEach(b => b.classList.toggle('on', b.dataset.p === T.last.penalty));
+}
+
+function newScramble() {
+  scr = CUBES[S.cube].scramble();
+  $('#scr').textContent = scr;
+  $('#scr').classList.toggle('long', scr.length > 70);
+}
+
+function recordSolve(raw, pen) {
+  const sess = cur();
+  const s = { id: uid(), cubeType: S.cube, scramble: scr, rawTime: raw, penalty: pen, finalTime: finalOf(raw, pen), timestamp: Date.now() };
+  sess.solves.push(s); T.last = s;
+  const hit = checkPBs(sess.solves);
+  save(); newScramble(); render();
+  if (hit.length) { toast('New PB! ' + hit.join(', ')); beep(1100, .15); }
+}
+function setPenalty(p) {
+  if (!T.last) return;
+  T.last.penalty = p; T.last.finalTime = finalOf(T.last.rawTime, p);
+  const hit = checkPBs(cur().solves);
+  save(); render();
+  if (hit.length) toast('New PB! ' + hit.join(', '));
+}
+function deleteSolve(id) {
+  const sess = cur();
+  sess.solves = sess.solves.filter(s => s.id !== id);
+  if (T.last && T.last.id === id) T.last = null;
+  save(); render();
+}
+
+function render() {
+  $('#tabs').innerHTML = Object.keys(CUBES).map(c => `<button data-c="${c}" class="${c === S.cube ? 'on' : ''}">${CUBES[c].label}</button>`).join('');
+  $('#ss').innerHTML = S.sessions.filter(x => x.cube === S.cube).map(x => `<option value="${x.id}" ${x.id === S.active[S.cube] ? 'selected' : ''}>${esc(x.name)} (${x.solves.length})</option>`).join('');
+  const sv = cur().solves, f = sv.map(s => s.finalTime), sm = Stats.summary(f), a = v => v == null ? '—' : fmt(v);
+  const cell = (l, v) => `<div><b>${v}</b><span>${l}</span></div>`;
+  $('#quick').innerHTML = cell('Ao5', a(sm.ao5)) + cell('Ao12', a(sm.ao12)) + cell('Best', a(sm.best));
+  $('#st').innerHTML = cell('Solves', sm.n) + cell('Best', a(sm.best)) + cell('Worst', a(sm.worst)) + cell('Mean', a(sm.mean)) +
+    cell('Ao5', a(sm.ao5)) + cell('Ao12', a(sm.ao12)) + cell('Ao50', a(sm.ao50)) + cell('Ao100', a(sm.ao100));
+  $('#pbh').textContent = CUBES[S.cube].label + ' Personal Records';
+  $('#pb').innerHTML = PBK.map(([k, n]) => `<div class="pbr"><span>${n}</span><b>${a(S.pbs[S.cube][k])}</b></div>`).join('');
+  $('#hist').innerHTML = '<tr><th>#</th><th class="r">Time</th><th>Penalty</th><th></th></tr>' + (sv.length ? sv.map((s, i) =>
+    `<tr title="${esc(s.scramble)}"><td>${i + 1}</td><td class="r">${sd(s)}</td><td>${s.penalty}</td><td class="r"><button class="x" data-del="${s.id}" aria-label="Delete solve ${i + 1}">×</button></td></tr>`).reverse().join('') : '<tr><td colspan="4" class="mut">No solves yet</td></tr>');
+  const v = f.filter(x => x != null);
+  if (v.length < 2) $('#gr').innerHTML = '<p class="mut">Complete 2+ solves to see the trend.</p>';
+  else {
+    const mx = Math.max(...v), mn = Math.min(...v), r = mx - mn || 1, n = f.length, pts = [];
+    f.forEach((x, i) => { if (x != null) pts.push((i / (n - 1) * 300).toFixed(1) + ',' + (96 - (x - mn) / r * 88).toFixed(1)); });
+    $('#gr').innerHTML = `<svg class="gr" viewBox="0 0 300 100" preserveAspectRatio="none"><polyline points="${pts.join(' ')}" fill="none" stroke="var(--acc)" stroke-width="2" vector-effect="non-scaling-stroke"/></svg><div class="gl mut"><span>fastest ${fmt(mn)}</span><span>slowest ${fmt(mx)}</span></div>`;
+  }
+  draw();
+}
+
+let tt;
+function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2600); }
+function ask(msg, val) {
+  return new Promise(res => {
+    const d = $('#dlg'), i = $('#dinp'), text = val !== undefined;
+    $('#dmsg').textContent = msg; i.hidden = !text; i.value = val || ''; d.returnValue = '';
+    d.onclose = () => res(d.returnValue === 'ok' ? (text ? (i.value.trim() || null) : true) : null);
+    d.showModal(); if (text) { i.focus(); i.select(); }
+  });
+}
+function applyTheme() {
+  const t = S.settings.theme, r = document.documentElement;
+  if (t === 'light' || t === 'dark') r.dataset.theme = t; else r.removeAttribute('data-theme');
+}
+function setCube(c) {
+  if (c === S.cube || T.s === 'running' || !CUBES[c]) return;
+  S.cube = c; save(); resetTimer(); newScramble(); render();
+}
+const modal = () => !!document.querySelector('dialog[open]');
+const idleish = () => T.s === 'idle' || T.s === 'stopped';
+
+/* ============ Events ============ */
+addEventListener('keydown', e => {
+  if (modal() || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
+  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) timerDown(); }
+  else if (e.repeat) return;
+  else if (e.key === 'n' || e.key === 'N') { if (idleish()) newScramble(); }
+  else if (e.key === 'Escape') resetTimer();
+  else if (e.key === 'Delete') { if (T.s !== 'running') { const sv = cur().solves; if (sv.length) deleteSolve(sv[sv.length - 1].id); } }
+});
+addEventListener('keyup', e => {
+  if (e.code === 'Space' && !modal() && !/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) { e.preventDefault(); timerUp(); }
+});
+addEventListener('pointerdown', e => {
+  if (modal()) return;
+  if (T.s === 'running') { timerDown(); return; }
+  if (e.target.closest('#tz')) { e.preventDefault(); timerDown(); }
+});
+addEventListener('pointerup', () => timerUp());
+addEventListener('pointercancel', () => timerUp());
+$('#tz').addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('click', e => { const b = e.target.closest('button'); if (b) b.blur(); });
+
+$('#tabs').onclick = e => { if (e.target.dataset.c) setCube(e.target.dataset.c); };
+$('#nsb').onclick = () => { if (idleish()) newScramble(); };
+$('#pbar').onclick = e => { if (e.target.dataset.p !== undefined) setPenalty(e.target.dataset.p); };
+$('#hist').onclick = e => { const id = e.target.dataset.del; if (id) deleteSolve(id); };
+$('#clr').onclick = async () => {
+  if (!cur().solves.length || T.s === 'running') return;
+  if (S.settings.confirmClear && !(await ask('Delete all solves in "' + cur().name + '"? This cannot be undone.'))) return;
+  cur().solves = []; resetTimer(); save(); render();
+};
+$('#ss').onchange = e => { S.active[S.cube] = e.target.value; save(); resetTimer(); render(); };
+$('#sn').onclick = async () => {
+  const n = await ask('New session name', 'Session ' + (S.sessions.filter(x => x.cube === S.cube).length + 1));
+  if (!n) return;
+  const s = mkSession(S.cube, n); S.sessions.push(s); S.active[S.cube] = s.id; save(); resetTimer(); render();
+};
+$('#sr').onclick = async () => { const n = await ask('Rename session', cur().name); if (n) { cur().name = n; save(); render(); } };
+$('#sd').onclick = async () => {
+  if (!(await ask('Delete session "' + cur().name + '" and all its solves?'))) return;
+  S.sessions = S.sessions.filter(x => x.id !== S.active[S.cube]);
+  if (!S.sessions.some(x => x.cube === S.cube)) S.sessions.push(mkSession(S.cube, 'Session 1'));
+  S.active[S.cube] = S.sessions.find(x => x.cube === S.cube).id;
+  save(); resetTimer(); render();
+};
+$('#gear').onclick = () => {
+  const s = S.settings;
+  $('#s1').checked = s.insp; $('#s2').value = s.inspDur; $('#s3').value = s.disp; $('#s4').value = s.theme;
+  $('#s5').checked = s.sound; $('#s6').checked = s.confirmClear;
+  $('#sdlg').showModal();
+};
+$('#sdlg').addEventListener('change', () => {
+  const s = S.settings;
+  s.insp = $('#s1').checked; s.inspDur = Math.min(60, Math.max(5, Math.round(+$('#s2').value) || 15));
+  s.disp = $('#s3').value; s.theme = $('#s4').value; s.sound = $('#s5').checked; s.confirmClear = $('#s6').checked;
+  save(); applyTheme(); draw();
+});
+
+initState(); applyTheme(); newScramble(); render();
+</script>
+</body>
+</html>
