@@ -99,9 +99,10 @@ function render() {
 
 let tt;
 function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.add('show'); clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 2600); }
-function ask(msg, val) {
+function ask(msg, val, danger) {
   return new Promise(res => {
-    const d = $('#dlg'), i = $('#dinp'), text = val !== undefined;
+    const d = $('#dlg'), i = $('#dinp'), text = val !== undefined, ok = d.querySelector('button[value="ok"]');
+    ok.style.background = ok.style.borderColor = danger ? 'var(--bad)' : '';
     $('#dmsg').textContent = msg; i.hidden = !text; i.value = val || ''; d.returnValue = '';
     d.onclose = () => res(d.returnValue === 'ok' ? (text ? (i.value.trim() || null) : true) : null);
     d.showModal(); if (text) { i.focus(); i.select(); }
@@ -144,8 +145,8 @@ function celebrate(names) {
   const c = $('#fxc'), g = c.getContext && c.getContext('2d');
   if (!g || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   c.width = innerWidth; c.height = innerHeight;
-  const cols = ['#3b82f6', '#16a34a', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'];
-  const ps = Array.from({ length: 140 }, () => ({ x: innerWidth / 2, y: innerHeight * .38, vx: (Math.random() - .5) * 16, vy: -Math.random() * 15 - 3, s: 6 + Math.random() * 7, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[Math.floor(Math.random() * cols.length)] }));
+  const cols = ['#ff3b6b', '#ffd400', '#22d3ee', '#7c3aed', '#22c55e', '#ff7a00', '#3b82f6'];
+  const ps = Array.from({ length: 190 }, () => ({ x: innerWidth / 2, y: innerHeight * .38, vx: (Math.random() - .5) * 16, vy: -Math.random() * 15 - 3, s: 6 + Math.random() * 7, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[Math.floor(Math.random() * cols.length)] }));
   const t0 = performance.now();
   (function step(now) {
     g.clearRect(0, 0, c.width, c.height);

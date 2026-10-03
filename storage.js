@@ -34,7 +34,7 @@ function checkPBs(solves) {
     const v = now[k], old = pb[k] && pb[k].v;
     if (v == null || !isFinite(v)) continue;
     if (old == null || v < old) {
-      if (old != null) hit.push(name);
+      hit.push(name);
       pb[k] = { v, ts: Date.now(), solves: solves.slice(-PBN[k]).map(s => ({ t: s.finalTime, raw: s.rawTime, pen: s.penalty, sc: s.scramble })) };
     }
   }

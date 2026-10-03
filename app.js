@@ -39,3 +39,24 @@ async function applyOrientation(userAction) {
   } catch (e) { if (userAction && o !== 'auto') toast('Rotation lock needs the installed app or fullscreen'); }
 }
 if (S.settings.orient !== 'auto' && isStandalone()) applyOrientation(false);
+
+// Update from GitHub: re-download every file bypassing caches, drop the service worker + caches, reload.
+// Solves and settings live in localStorage, which is untouched.
+async function updateApp() {
+  const btn = $('#upd');
+  if (!navigator.onLine) return toast('You are offline');
+  btn.disabled = true; btn.textContent = 'Updating…';
+  try {
+    const urls = [...new Set([...document.querySelectorAll('script[src],link[href]')].map(x => x.src || x.href)
+      .concat(['sw.js', './'].map(u => new URL(u, location.href).href)))];
+    const rs = await Promise.all(urls.map(u => fetch(u, { cache: 'reload' })));
+    if (rs.some(r => !r.ok)) throw new Error('bad response');
+    if ('serviceWorker' in navigator) await Promise.all((await navigator.serviceWorker.getRegistrations()).map(r => r.unregister()));
+    if (window.caches) await Promise.all((await caches.keys()).map(k => caches.delete(k)));
+    location.reload();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Update app';
+    toast("Couldn't reach GitHub. Nothing was changed.");
+  }
+}
+$('#upd').onclick = updateApp;
