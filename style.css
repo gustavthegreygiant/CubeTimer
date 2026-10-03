@@ -75,3 +75,9 @@ body.focus .top,body.focus .sess,body.focus .quick,body.focus .grid,body.focus .
   .tz{height:max(150px,calc(100dvh - 230px))}
   .tm{font-size:min(30vw,36vh)}
 }
+
+/* ---- colours + touch lock ---- */
+:root[data-theme="black"]{--bg:#000;--fg:#e8eaed;--mut:#8b9199;--line:#25282c;--panel:#0b0c0e;--good:#4ade80;--bad:#f87171;--warn:#fbbf24}
+.tm{color:var(--tc,var(--fg))}
+.tz{transition:opacity .15s}.tz.locked{opacity:.4}
+dialog{max-height:90dvh;overflow-y:auto}

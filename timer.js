@@ -2,7 +2,7 @@
 const HOLD = 300;
 const ACT = new Set(['hold', 'inspect', 'inspHold', 'running']);
 // states: idle | stopped | hold | inspect | inspHold | running
-const T = { s: 'idle', t0: 0, tI: 0, hold: 0, pen: '', raf: 0, last: null, beeped: false };
+const T = { s: 'idle', t0: 0, tI: 0, hold: 0, pen: '', raf: 0, last: null, beeped: false, lockUntil: 0 };
 let scr = '';
 const ready = () => performance.now() - T.hold >= HOLD;
 function arm() { T.hold = performance.now(); T.beeped = false; loop(); }
@@ -34,6 +34,8 @@ function stopTimer(n) {
   cancelAnimationFrame(T.raf);
   const raw = Math.round(n - T.t0);
   T.s = 'stopped';
+  T.lockUntil = n + S.settings.lock * 1000;   // ignore timer touches briefly (accidental taps)
+  if (S.settings.lock) setTimeout(draw, S.settings.lock * 1000 + 30);
   recordSolve(raw, T.pen);
   beep(660, .08);
 }

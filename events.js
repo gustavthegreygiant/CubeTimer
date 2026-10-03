@@ -13,7 +13,7 @@ addEventListener('keyup', e => {
 addEventListener('pointerdown', e => {
   if (modal()) return;
   if (T.s === 'running') { timerDown(); return; }
-  if (e.target.closest('#tz')) { e.preventDefault(); timerDown(); }
+  if (e.target.closest('#tz')) { e.preventDefault(); if (T.s === 'stopped' && performance.now() < T.lockUntil) return; timerDown(); }
 });
 addEventListener('pointerup', () => timerUp());
 addEventListener('pointercancel', () => timerUp());
@@ -46,7 +46,7 @@ $('#sd').onclick = async () => {
 $('#gear').onclick = () => {
   const s = S.settings;
   $('#s1').checked = s.insp; $('#s2').value = s.inspDur; $('#s3').value = s.disp; $('#s4').value = s.theme;
-  $('#s5').checked = s.sound; $('#s6').checked = s.confirmClear; $('#s7').value = s.orient;
+  $('#s5').checked = s.sound; $('#s6').checked = s.confirmClear; $('#s7').value = s.orient; $('#s8').value = s.accent; $('#s9').value = s.tcolor; $('#s10').value = String(s.lock);
   $('#sdlg').showModal();
 };
 $('#sdlg').addEventListener('change', () => {
@@ -54,6 +54,7 @@ $('#sdlg').addEventListener('change', () => {
   s.insp = $('#s1').checked; s.inspDur = Math.min(60, Math.max(5, Math.round(+$('#s2').value) || 15));
   s.disp = $('#s3').value; s.theme = $('#s4').value; s.sound = $('#s5').checked; s.confirmClear = $('#s6').checked;
   const o = $('#s7').value, oc = o !== s.orient; s.orient = o;
+  s.accent = $('#s8').value; s.tcolor = $('#s9').value; s.lock = +$('#s10').value;
   save(); applyTheme(); draw(); if (oc) applyOrientation(true);
 });
 

@@ -30,6 +30,7 @@ function draw() {
   }
   $('#tm').textContent = txt; $('#tm').className = 'tm ' + cls; $('#sub').textContent = sub;
   if (typeof setFocus === 'function') setFocus(ACT.has(T.s));
+  $('#tz').classList.toggle('locked', T.s === 'stopped' && performance.now() < T.lockUntil);
   const show = T.s === 'stopped' && !!T.last;
   $('#pbar').hidden = !show;
   if (show) document.querySelectorAll('#pbar button').forEach(b => b.classList.toggle('on', b.dataset.p === T.last.penalty));
@@ -95,9 +96,15 @@ function ask(msg, val) {
     d.showModal(); if (text) { i.focus(); i.select(); }
   });
 }
+const ACCENTS = { blue: '#3b82f6', green: '#16a34a', purple: '#8b5cf6', orange: '#ea580c', pink: '#db2777', teal: '#0d9488' };
+const TCOLORS = Object.assign({ default: null, accent: 'var(--acc)' }, ACCENTS);
 function applyTheme() {
-  const t = S.settings.theme, r = document.documentElement;
-  if (t === 'light' || t === 'dark') r.dataset.theme = t; else r.removeAttribute('data-theme');
+  const st = S.settings, r = document.documentElement;
+  if (['light', 'dark', 'black'].includes(st.theme)) r.dataset.theme = st.theme; else r.removeAttribute('data-theme');
+  const acc = ACCENTS[st.accent] || ACCENTS.blue, tc = TCOLORS[st.tcolor];
+  r.style.setProperty('--acc', acc);
+  if (tc) r.style.setProperty('--tc', tc); else r.style.removeProperty('--tc');
+  const m = document.querySelector('meta[name="theme-color"]'); if (m) m.content = acc;
 }
 function setCube(c) {
   if (c === S.cube || T.s === 'running' || !CUBES[c]) return;

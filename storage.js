@@ -11,7 +11,7 @@ function initState() {
   const l = Store.load() || {};
   S = {
     cube: CUBES[l.cube] ? l.cube : '3x3',
-    settings: Object.assign({ insp: false, inspDur: 15, disp: 'cs', theme: 'system', sound: false, confirmClear: true, orient: 'auto' }, l.settings),
+    settings: Object.assign({ insp: false, inspDur: 15, disp: 'cs', theme: 'system', sound: false, confirmClear: true, orient: 'auto', accent: 'blue', tcolor: 'default', lock: 1.5 }, l.settings),
     sessions: Array.isArray(l.sessions) ? l.sessions : [],
     active: l.active || {}, pbs: l.pbs || {}
   };
