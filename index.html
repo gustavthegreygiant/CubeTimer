@@ -15,32 +15,39 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-view="timer">
 <div class="wrap">
   <header class="top">
     <h1>Cube Timer</h1>
     <button id="fs" aria-label="Fullscreen">⛶</button><button id="inst" hidden>Install</button><button id="gear" aria-label="Settings">⚙ Settings</button>
     <div class="tabs" id="tabs"></div>
   </header>
-  <div class="sess">
+  <section id="vTimer" class="view">
+    <div id="scr" class="scr"></div>
+    <div class="c"><button id="nsb">New Scramble</button></div>
+    <div id="tz" class="tz" role="button" aria-label="Timer: hold, release to start, press to stop">
+    <div id="tm" class="tm">0.00</div><div id="sub" class="sub"></div>
+  </div>
+  <div id="pbar" hidden><button data-p="">OK</button><button data-p="+2">+2</button><button data-p="DNF">DNF</button><button data-star="1" aria-label="Star this solve">☆</button></div>
+    <div class="quick" id="quick"></div>
+  </section>
+  <section id="vStats" class="view">
+    <div class="sess">
     <select id="ss" aria-label="Session"></select>
     <button id="sn">+ New</button><button id="sr">Rename</button><button id="sd">Delete</button>
   </div>
-  <div id="scr" class="scr"></div>
-  <div class="c"><button id="nsb">New Scramble</button></div>
-  <div id="tz" class="tz" role="button" aria-label="Timer: hold, release to start, press to stop">
-    <div id="tm" class="tm">0.00</div><div id="sub" class="sub"></div>
-  </div>
-  <div id="pbar" hidden><button data-p="">OK</button><button data-p="+2">+2</button><button data-p="DNF">DNF</button></div>
-  <div class="quick" id="quick"></div>
-  <div class="grid">
-    <section class="p"><h2>Session Statistics</h2><div id="st" class="sg"></div></section>
-    <section class="p"><h2 id="pbh">Personal Records</h2><div id="pb"></div></section>
-    <section class="p"><h2>Time Trend</h2><div id="gr"></div></section>
-    <section class="p"><div class="hh"><h2>Solve History</h2><button id="clr">Clear Session</button></div><div class="hs"><table id="hist"></table></div></section>
-  </div>
-  <div class="foot">Space: hold → release to start, press to stop · N new scramble · Esc cancel · Del delete last · Touch: tap & hold the timer</div>
+    <div class="grid">
+      <section class="p"><h2>Session Statistics</h2><div id="st" class="sg"></div></section>
+      <section class="p"><h2 id="pbh">Personal Records</h2><div id="pb"></div></section>
+      <section class="p"><h2>Highlights ★</h2><div id="hl"></div></section>
+      <section class="p"><h2>Time Trend</h2><div id="gr"></div></section>
+      <section class="p"><div class="hh"><h2>Solve History</h2><button id="clr">Clear Session</button></div><div class="hs"><table id="hist"></table></div></section>
+    </div>
+    <div class="foot">Space: hold → release to start, press to stop · N new scramble · Esc cancel · Del delete last · Touch: tap & hold the timer</div>
+  </section>
+  <nav class="nav" id="nav"><button data-v="timer" class="on">⏱ Timer</button><button data-v="stats">📊 Stats</button></nav>
 </div>
+<div id="fx" aria-hidden="true"><canvas id="fxc"></canvas><div class="fxb"><div class="trophy">🏆</div><div id="fxt"></div></div></div>
 <div id="toast"></div>
 
 <dialog id="dlg"><form method="dialog"><p id="dmsg"></p><input id="dinp" maxlength="40" style="width:100%"><div class="btns"><button value="ok" class="pri">OK</button><button value="cancel">Cancel</button></div></form></dialog>
@@ -54,6 +61,7 @@
   <label>Accent color <select id="s8"><option value="blue">Blue</option><option value="green">Green</option><option value="purple">Purple</option><option value="orange">Orange</option><option value="pink">Pink</option><option value="teal">Teal</option></select></label>
   <label>Timer color <select id="s9"><option value="default">Default</option><option value="accent">Match accent</option><option value="blue">Blue</option><option value="green">Green</option><option value="purple">Purple</option><option value="orange">Orange</option><option value="pink">Pink</option><option value="teal">Teal</option></select></label>
   <label>Touch lock after solve <select id="s10"><option value="0">Off</option><option value="1">1 s</option><option value="1.5">1.5 s</option><option value="2">2 s</option><option value="3">3 s</option></select></label>
+  <label>Celebrate new PBs <input type="checkbox" id="s11"></label>
   <label>Orientation <select id="s7"><option value="auto">Auto (rotate freely)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
   <label>Sound <input type="checkbox" id="s5"></label>
   <label>Confirm before clearing <input type="checkbox" id="s6"></label>

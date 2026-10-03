@@ -1,6 +1,7 @@
 /* ============ UI ============ */
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let openId = null, openPB = null;
 const sd = s => s.penalty === 'DNF' ? 'DNF' : fmt(s.finalTime);
 
 function inspCls() {  // blue = plenty of time, amber = last 3 s / +2 zone, red = DNF
@@ -33,7 +34,7 @@ function draw() {
   $('#tz').classList.toggle('locked', T.s === 'stopped' && performance.now() < T.lockUntil);
   const show = T.s === 'stopped' && !!T.last;
   $('#pbar').hidden = !show;
-  if (show) document.querySelectorAll('#pbar button').forEach(b => b.classList.toggle('on', b.dataset.p === T.last.penalty));
+  if (show) document.querySelectorAll('#pbar button').forEach(b => { if (b.dataset.star) { b.classList.toggle('on', !!T.last.star); b.textContent = T.last.star ? '★' : '☆'; } else b.classList.toggle('on', b.dataset.p === T.last.penalty); });
 }
 
 function newScramble() {
@@ -48,14 +49,14 @@ function recordSolve(raw, pen) {
   sess.solves.push(s); T.last = s;
   const hit = checkPBs(sess.solves);
   save(); newScramble(); render();
-  if (hit.length) { toast('New PB! ' + hit.join(', ')); beep(1100, .15); }
+  if (hit.length) { celebrate(hit); beep(1100, .15); }
 }
 function setPenalty(p) {
   if (!T.last) return;
   T.last.penalty = p; T.last.finalTime = finalOf(T.last.rawTime, p);
   const hit = checkPBs(cur().solves);
   save(); render();
-  if (hit.length) toast('New PB! ' + hit.join(', '));
+  if (hit.length) celebrate(hit);
 }
 function deleteSolve(id) {
   const sess = cur();
@@ -73,9 +74,19 @@ function render() {
   $('#st').innerHTML = cell('Solves', sm.n) + cell('Best', a(sm.best)) + cell('Worst', a(sm.worst)) + cell('Mean', a(sm.mean)) +
     cell('Ao5', a(sm.ao5)) + cell('Ao12', a(sm.ao12)) + cell('Ao50', a(sm.ao50)) + cell('Ao100', a(sm.ao100));
   $('#pbh').textContent = CUBES[S.cube].label + ' Personal Records';
-  $('#pb').innerHTML = PBK.map(([k, n]) => `<div class="pbr"><span>${n}</span><b>${a(S.pbs[S.cube][k])}</b></div>`).join('');
-  $('#hist').innerHTML = '<tr><th>#</th><th class="r">Time</th><th>Penalty</th><th></th></tr>' + (sv.length ? sv.map((s, i) =>
-    `<tr title="${esc(s.scramble)}"><td>${i + 1}</td><td class="r">${sd(s)}</td><td>${s.penalty}</td><td class="r"><button class="x" data-del="${s.id}" aria-label="Delete solve ${i + 1}">×</button></td></tr>`).reverse().join('') : '<tr><td colspan="4" class="mut">No solves yet</td></tr>');
+  const pbs = S.pbs[S.cube], dt = ts => new Date(ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  const sc = x => `<div class="scs">${esc(x || '')}</div>`;
+  $('#pb').innerHTML = PBK.map(([k, n]) => {
+    const r = pbs[k]; let det = '';
+    if (r && openPB === k) det = '<div class="det">' + (r.ts ? dt(r.ts) : 'Set before details were recorded') +
+      (r.solves || []).map((x, i) => `<div class="ds"><b>${r.solves.length > 1 ? (i + 1) + '. ' : ''}${x.pen === 'DNF' ? 'DNF' : fmt(x.t)}${x.pen === '+2' ? ' +2' : ''}</b>${sc(x.sc)}</div>`).join('') + '</div>';
+    return `<div class="pbw"><button class="pbr" data-pb="${k}" ${r ? '' : 'disabled'}><span>${n}</span><b>${a(r && r.v)}</b></button>${det}</div>`;
+  }).join('');
+  const hl = S.sessions.filter(x => x.cube === S.cube).flatMap(x => x.solves.filter(s => s.star).map(s => Object.assign({ sn: x.name }, s))).sort((p, q) => q.timestamp - p.timestamp);
+  $('#hl').innerHTML = hl.length ? hl.map(s => `<div class="hlr"><div class="hlt"><b>${sd(s)}</b><span class="mut">${dt(s.timestamp)} · ${esc(s.sn)}</span><button class="x" data-star="${s.id}" aria-label="Remove star">★</button></div>${sc(s.scramble)}</div>`).join('') : '<p class="mut">Tap ☆ after a solve (or in the history) to keep a good solve and its scramble here.</p>';
+  $('#hist').innerHTML = '<tr><th>#</th><th class="r">Time</th><th>Penalty</th><th></th><th></th></tr>' + (sv.length ? sv.map((s, i) =>
+    `<tr class="hr" data-open="${s.id}"><td>${i + 1}</td><td class="r">${sd(s)}</td><td>${s.penalty}</td><td><button class="x" data-star="${s.id}" aria-label="Star solve ${i + 1}">${s.star ? '★' : '☆'}</button></td><td class="r"><button class="x" data-del="${s.id}" aria-label="Delete solve ${i + 1}">×</button></td></tr>` +
+    (openId === s.id ? `<tr class="dtr"><td colspan="5">${dt(s.timestamp)}${sc(s.scramble)}</td></tr>` : '')).reverse().join('') : '<tr><td colspan="5" class="mut">No solves yet</td></tr>');
   const v = f.filter(x => x != null);
   if (v.length < 2) $('#gr').innerHTML = '<p class="mut">Complete 2+ solves to see the trend.</p>';
   else {
@@ -112,3 +123,33 @@ function setCube(c) {
 }
 const modal = () => !!document.querySelector('dialog[open]');
 const idleish = () => T.s === 'idle' || T.s === 'stopped';
+
+function toggleStar(id) {
+  for (const s of S.sessions) { const x = s.solves.find(v => v.id === id); if (x) { x.star = !x.star; break; } }
+  save(); render();
+}
+
+/* PB celebration: trophy + confetti. Never blocks touches; stops when the next solve begins. */
+function stopCelebrate() {
+  clearTimeout(celebrate.t); cancelAnimationFrame(celebrate.raf);
+  $('#fx').classList.remove('show');
+  const g = $('#fxc').getContext && $('#fxc').getContext('2d'); if (g) g.clearRect(0, 0, $('#fxc').width, $('#fxc').height);
+}
+function celebrate(names) {
+  if (!S.settings.celebrate) return;
+  stopCelebrate();
+  $('#fxt').textContent = 'New PB! ' + names.join(' · ');
+  $('#fx').classList.add('show');
+  celebrate.t = setTimeout(stopCelebrate, 3400);
+  const c = $('#fxc'), g = c.getContext && c.getContext('2d');
+  if (!g || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  c.width = innerWidth; c.height = innerHeight;
+  const cols = ['#3b82f6', '#16a34a', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6'];
+  const ps = Array.from({ length: 140 }, () => ({ x: innerWidth / 2, y: innerHeight * .38, vx: (Math.random() - .5) * 16, vy: -Math.random() * 15 - 3, s: 6 + Math.random() * 7, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[Math.floor(Math.random() * cols.length)] }));
+  const t0 = performance.now();
+  (function step(now) {
+    g.clearRect(0, 0, c.width, c.height);
+    for (const p of ps) { p.vy += .33; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .6); g.restore(); }
+    if (now - t0 < 3200) celebrate.raf = requestAnimationFrame(step); else g.clearRect(0, 0, c.width, c.height);
+  })(t0);
+}

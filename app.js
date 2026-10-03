@@ -7,7 +7,7 @@ function setFocus(on) {
   if (on === focusOn) return;
   focusOn = on;
   document.body.classList.toggle('focus', on);
-  if (on) lockScreen(); else { try { if (wake) wake.release(); } catch (e) {} wake = null; }
+  if (on) { lockScreen(); if (typeof stopCelebrate === 'function') stopCelebrate(); } else { try { if (wake) wake.release(); } catch (e) {} wake = null; }
 }
 async function lockScreen() {
   try {
