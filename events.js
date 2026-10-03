@@ -46,14 +46,15 @@ $('#sd').onclick = async () => {
 $('#gear').onclick = () => {
   const s = S.settings;
   $('#s1').checked = s.insp; $('#s2').value = s.inspDur; $('#s3').value = s.disp; $('#s4').value = s.theme;
-  $('#s5').checked = s.sound; $('#s6').checked = s.confirmClear;
+  $('#s5').checked = s.sound; $('#s6').checked = s.confirmClear; $('#s7').value = s.orient;
   $('#sdlg').showModal();
 };
 $('#sdlg').addEventListener('change', () => {
   const s = S.settings;
   s.insp = $('#s1').checked; s.inspDur = Math.min(60, Math.max(5, Math.round(+$('#s2').value) || 15));
   s.disp = $('#s3').value; s.theme = $('#s4').value; s.sound = $('#s5').checked; s.confirmClear = $('#s6').checked;
-  save(); applyTheme(); draw();
+  const o = $('#s7').value, oc = o !== s.orient; s.orient = o;
+  save(); applyTheme(); draw(); if (oc) applyOrientation(true);
 });
 
 initState(); applyTheme(); newScramble(); render();

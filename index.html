@@ -6,6 +6,11 @@
 <title>Cube Timer</title>
 <meta name="theme-color" content="#2563eb">
 <meta name="description" content="A simple, fast speedcubing timer for 2x2, 3x3 and 4x4.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Cube Timer">
+<link rel="apple-touch-icon" href="icon-180.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
@@ -14,7 +19,7 @@
 <div class="wrap">
   <header class="top">
     <h1>Cube Timer</h1>
-    <button id="gear" aria-label="Settings">⚙ Settings</button>
+    <button id="fs" aria-label="Fullscreen">⛶</button><button id="inst" hidden>Install</button><button id="gear" aria-label="Settings">⚙ Settings</button>
     <div class="tabs" id="tabs"></div>
   </header>
   <div class="sess">
@@ -46,6 +51,7 @@
   <label>Inspection seconds <input type="number" id="s2" min="5" max="60"></label>
   <label>Timer display <select id="s3"><option value="cs">0.01 s</option><option value="ds">0.1 s</option><option value="hide">Hidden while running</option></select></label>
   <label>Theme <select id="s4"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
+  <label>Orientation <select id="s7"><option value="auto">Auto (rotate freely)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
   <label>Sound <input type="checkbox" id="s5"></label>
   <label>Confirm before clearing <input type="checkbox" id="s6"></label>
   <h3>Keyboard Shortcuts</h3>
@@ -59,6 +65,7 @@
 <script src="timer.js"></script>
 <script src="ui.js"></script>
 <script src="events.js"></script>
+<script src="app.js"></script>
 <script src="pwa.js"></script>
 </body>
 </html>

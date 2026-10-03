@@ -3,6 +3,10 @@ const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const sd = s => s.penalty === 'DNF' ? 'DNF' : fmt(s.finalTime);
 
+function inspCls() {  // blue = plenty of time, amber = last 3 s / +2 zone, red = DNF
+  const e = (performance.now() - T.tI) / 1000, d = S.settings.inspDur;
+  return e < d - 3 ? 'ins' : e <= d + 2 ? 'warn' : 'bad';
+}
 function draw() {
   let txt = '0.00', cls = '', sub = '';
   const dsp = S.settings.disp;
@@ -13,7 +17,6 @@ function draw() {
         sub = T.last.penalty === 'DNF' ? 'DNF (raw ' + fmt(T.last.rawTime) + ')' : T.last.penalty ? '+2 penalty' : '';
       }
       break;
-    case 'pre': txt = String(S.settings.inspDur); cls = 'ins'; break;
     case 'hold': case 'inspHold': {
       const r = ready();
       if (r && !T.beeped) { T.beeped = true; beep(); }
@@ -22,10 +25,11 @@ function draw() {
       else { txt = inspText(); cls = 'held'; }
       break;
     }
-    case 'inspect': txt = inspText(); cls = 'ins'; break;
+    case 'inspect': txt = inspText(); cls = inspCls(); break;
     case 'running': txt = dsp === 'hide' ? '…' : fmt(performance.now() - T.t0, dsp === 'ds' ? 1 : 2); break;
   }
   $('#tm').textContent = txt; $('#tm').className = 'tm ' + cls; $('#sub').textContent = sub;
+  if (typeof setFocus === 'function') setFocus(ACT.has(T.s));
   const show = T.s === 'stopped' && !!T.last;
   $('#pbar').hidden = !show;
   if (show) document.querySelectorAll('#pbar button').forEach(b => b.classList.toggle('on', b.dataset.p === T.last.penalty));

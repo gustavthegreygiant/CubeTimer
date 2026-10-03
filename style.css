@@ -21,7 +21,7 @@ select,input[type=number],input:not([type]){min-height:44px;padding:0 10px;borde
 .c{text-align:center}
 .tz{height:clamp(200px,40vh,380px);display:flex;flex-direction:column;align-items:center;justify-content:center;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none;cursor:pointer;border-radius:16px}
 .tm{font-size:clamp(64px,19vw,168px);font-weight:600;font-variant-numeric:tabular-nums;line-height:1;letter-spacing:-.02em}
-.tm.held{color:var(--bad)}.tm.ready{color:var(--good)}.tm.ins{color:var(--warn)}
+.tm.held{color:var(--bad)}.tm.ready{color:var(--good)}.tm.ins{color:var(--acc)}.tm.warn{color:var(--warn)}.tm.bad{color:var(--bad)}
 .sub{min-height:26px;color:var(--warn);font-weight:600;margin-top:8px}
 #pbar{display:flex;gap:8px;justify-content:center;margin-bottom:6px}
 #pbar button.on{background:var(--fg);color:var(--bg)}
@@ -54,3 +54,24 @@ dialog input[type=checkbox]{width:22px;height:22px}
 dialog input[type=number]{width:90px}
 dialog h3{margin:14px 0 4px;font-size:14px}
 dialog ul{margin:0;padding-left:18px;color:var(--mut);font-size:14px}
+
+/* ---- app-like behaviour ---- */
+html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+input{-webkit-user-select:text;user-select:text}
+button,select{touch-action:manipulation}
+.wrap{min-height:100dvh}
+#fs,#inst{min-width:44px}
+.top,.sess,.quick,.grid,.foot,#nsb,#pbar{transition:opacity .15s}
+body.focus .top,body.focus .sess,body.focus .quick,body.focus .grid,body.focus .foot,body.focus #nsb,body.focus #pbar{opacity:0;pointer-events:none}
+#toast{max-width:90vw;width:max-content;text-align:center;border-radius:18px}
+/* ---- landscape phones ---- */
+@media (orientation:landscape) and (max-height:520px){
+  .wrap{padding:6px 14px 10px}
+  .top{flex-wrap:nowrap}.top h1{display:none}
+  .tabs{order:0;width:auto;flex:1}.tabs button{min-height:40px;font-size:16px}
+  .top>.tabs{margin-right:auto}
+  .sess{margin-top:6px}
+  .scr{font-size:clamp(16px,2.6vw,22px);margin:8px auto 4px}.scr.long{font-size:clamp(14px,2.2vw,18px)}
+  .tz{height:max(150px,calc(100dvh - 230px))}
+  .tm{font-size:min(30vw,36vh)}
+}

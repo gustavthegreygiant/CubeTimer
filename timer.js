@@ -1,7 +1,7 @@
 /* ============ Timer + inspection (performance.now timestamps only) ============ */
 const HOLD = 300;
 const ACT = new Set(['hold', 'inspect', 'inspHold', 'running']);
-// states: idle | stopped | pre | hold | inspect | inspHold | running
+// states: idle | stopped | hold | inspect | inspHold | running
 const T = { s: 'idle', t0: 0, tI: 0, hold: 0, pen: '', raf: 0, last: null, beeped: false };
 let scr = '';
 const ready = () => performance.now() - T.hold >= HOLD;
@@ -15,12 +15,11 @@ function timerDown() {
   const n = performance.now();
   if (T.s === 'running') return stopTimer(n);
   if (T.s === 'idle' || T.s === 'stopped') {
-    if (S.settings.insp) { T.s = 'pre'; draw(); } else { T.s = 'hold'; arm(); }
+    if (S.settings.insp) { T.tI = n; T.s = 'inspect'; loop(); } else { T.s = 'hold'; arm(); }
   } else if (T.s === 'inspect') { T.s = 'inspHold'; arm(); }
 }
 function timerUp() {
-  if (T.s === 'pre') { T.tI = performance.now(); T.s = 'inspect'; loop(); }
-  else if (T.s === 'hold') { if (ready()) startTimer(); else { T.s = T.last ? 'stopped' : 'idle'; draw(); } }
+  if (T.s === 'hold') { if (ready()) startTimer(); else { T.s = T.last ? 'stopped' : 'idle'; draw(); } }
   else if (T.s === 'inspHold') { if (ready()) startTimer(); else { T.s = 'inspect'; loop(); } }
 }
 function startTimer() {
