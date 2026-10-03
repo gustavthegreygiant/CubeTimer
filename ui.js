@@ -141,16 +141,25 @@ function celebrate(names) {
   stopCelebrate();
   $('#fxt').textContent = 'New PB! ' + names.join(' · ');
   $('#fx').classList.add('show');
-  celebrate.t = setTimeout(stopCelebrate, 3400);
+  celebrate.t = setTimeout(stopCelebrate, 4300);
   const c = $('#fxc'), g = c.getContext && c.getContext('2d');
   if (!g || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   c.width = innerWidth; c.height = innerHeight;
   const cols = ['#ff3b6b', '#ffd400', '#22d3ee', '#7c3aed', '#22c55e', '#ff7a00', '#3b82f6'];
-  const ps = Array.from({ length: 190 }, () => ({ x: innerWidth / 2, y: innerHeight * .38, vx: (Math.random() - .5) * 16, vy: -Math.random() * 15 - 3, s: 6 + Math.random() * 7, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: cols[Math.floor(Math.random() * cols.length)] }));
+  const W = innerWidth, H = innerHeight, ps = [];
+  const mk = (x, y, vx, vy) => ({ x, y, vx, vy, s: 7 + Math.random() * 9, r: Math.random() * 6, vr: (Math.random() - .5) * .45, c: cols[Math.floor(Math.random() * cols.length)] });
+  for (let i = 0; i < 260; i++) { const an = Math.random() * Math.PI * 2, v = 4 + Math.random() * 15; ps.push(mk(W / 2, H * .5, Math.cos(an) * v, Math.sin(an) * v - 4)); }  // burst from the middle
+  for (let i = 0; i < 100; i++) { ps.push(mk(0, H, 6 + Math.random() * 12, -(14 + Math.random() * 14))); ps.push(mk(W, H, -(6 + Math.random() * 12), -(14 + Math.random() * 14))); }  // side cannons
   const t0 = performance.now();
   (function step(now) {
+    const t = now - t0;
     g.clearRect(0, 0, c.width, c.height);
-    for (const p of ps) { p.vy += .33; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.r += p.vr; g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .6); g.restore(); }
-    if (now - t0 < 3200) celebrate.raf = requestAnimationFrame(step); else g.clearRect(0, 0, c.width, c.height);
+    if (t < 2200) for (let i = 0; i < 7; i++) ps.push(mk(Math.random() * W, -20, (Math.random() - .5) * 3, 2 + Math.random() * 4));  // confetti rain
+    for (let i = ps.length - 1; i >= 0; i--) {
+      const p = ps[i]; p.vy += .3; p.vx *= .992; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      if (p.y > H + 40) { ps.splice(i, 1); continue; }
+      g.save(); g.translate(p.x, p.y); g.rotate(p.r); g.fillStyle = p.c; g.fillRect(-p.s / 2, -p.s / 3, p.s, p.s * .6); g.restore();
+    }
+    if (t < 4000) celebrate.raf = requestAnimationFrame(step); else g.clearRect(0, 0, c.width, c.height);
   })(t0);
 }

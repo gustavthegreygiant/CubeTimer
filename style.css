@@ -110,7 +110,7 @@ td .x{font-size:20px}
 /* ---- PB celebration ---- */
 #fx{position:fixed;inset:0;pointer-events:none;opacity:0;transition:opacity .2s;z-index:50}
 #fx.show{opacity:1}#fxc{position:absolute;inset:0;width:100%;height:100%}
-.fxb{position:absolute;left:50%;top:36%;transform:translate(-50%,-50%);text-align:center;width:90vw}
+.fxb{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;width:90vw}
 .trophy{font-size:clamp(80px,22vw,140px);line-height:1;filter:drop-shadow(0 6px 12px rgba(0,0,0,.35))}
 
 #fxt{display:inline-block;margin-top:10px;padding:8px 18px;border-radius:18px;background:var(--fg);color:var(--bg);font-weight:700;font-size:20px}
@@ -127,3 +127,10 @@ td .x{font-size:20px}
 @keyframes glow{from{transform:scale(.85);opacity:.7}to{transform:scale(1.15);opacity:1}}
 @media (prefers-reduced-motion:reduce){#fx.show .trophy,.fxb::before{animation:none}}
 .wide{width:100%}.danger{color:var(--bad);border-color:var(--bad)}
+
+/* ---- bigger, centred celebration with dimmed background ---- */
+#fx::before{content:"";position:absolute;inset:0;background:rgba(20,20,20,.55);-webkit-backdrop-filter:grayscale(1) brightness(.7);backdrop-filter:grayscale(1) brightness(.7)}
+.trophy{font-size:clamp(130px,min(50vw,44vh),300px)}
+#fxt{font-size:clamp(22px,5.5vw,34px);padding:10px 24px;border-radius:24px;margin-top:16px}
+.fxb::before{width:min(560px,96vw);height:min(560px,96vw);margin-left:calc(min(560px,96vw) / -2);top:50%;margin-top:calc(min(560px,96vw) / -2)}
+#fx.show .trophy{animation-duration:3.6s}
