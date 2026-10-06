@@ -134,3 +134,15 @@ td .x{font-size:20px}
 #fxt{font-size:clamp(22px,5.5vw,34px);padding:10px 24px;border-radius:24px;margin-top:16px}
 .fxb::before{width:min(560px,96vw);height:min(560px,96vw);margin-left:calc(min(560px,96vw) / -2);top:50%;margin-top:calc(min(560px,96vw) / -2)}
 #fx.show .trophy{animation-duration:3.6s}
+
+/* ---- recent strip + vector nav ---- */
+.recent{display:flex;align-items:center;gap:10px;margin:6px 0 2px;min-height:40px;transition:opacity .15s}
+.rl{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut)}
+#rc{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none;touch-action:pan-x}#rc::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-variant-numeric:tabular-nums}
+.chip.new{border-color:var(--acc);color:var(--acc);font-weight:600}
+.chip i{font-style:normal;color:var(--warn);font-size:12px;margin-left:4px}
+body.focus .recent{opacity:0;pointer-events:none}
+.nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;min-height:56px}
+.nav button *{pointer-events:none}
+@media (orientation:landscape) and (max-height:520px){.nav button{min-height:40px;flex-direction:row;gap:8px;font-size:14px}.recent{margin:2px 0}}

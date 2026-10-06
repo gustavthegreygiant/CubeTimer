@@ -4,7 +4,7 @@ function showView(v) {
   document.body.dataset.view = v;
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
 }
-$('#nav').onclick = e => { const v = e.target.dataset.v; if (v && !ACT.has(T.s)) showView(v); };
+$('#nav').onclick = e => { const b = e.target.closest('button'), v = b && b.dataset.v; if (v && !ACT.has(T.s)) showView(v); };
 addEventListener('keydown', e => {
   if (modal() || /INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   if (e.code === 'Space') { e.preventDefault(); if (!e.repeat && onTimer()) timerDown(); }
@@ -40,7 +40,7 @@ $('#hl').onclick = e => { if (e.target.dataset.star) toggleStar(e.target.dataset
 $('#clr').onclick = async () => {
   if (!cur().solves.length || T.s === 'running') return;
   if (S.settings.confirmClear && !(await ask('Delete all solves in "' + cur().name + '"? This cannot be undone.'))) return;
-  cur().solves = []; resetTimer(); save(); render();
+  cur().solves = []; rebuildPBs(S.cube); resetTimer(); save(); render();
 };
 $('#ss').onchange = e => { S.active[S.cube] = e.target.value; save(); resetTimer(); render(); };
 $('#sn').onclick = async () => {
@@ -54,7 +54,7 @@ $('#sd').onclick = async () => {
   S.sessions = S.sessions.filter(x => x.id !== S.active[S.cube]);
   if (!S.sessions.some(x => x.cube === S.cube)) S.sessions.push(mkSession(S.cube, 'Session 1'));
   S.active[S.cube] = S.sessions.find(x => x.cube === S.cube).id;
-  save(); resetTimer(); render();
+  rebuildPBs(S.cube); save(); resetTimer(); render();
 };
 $('#gear').onclick = () => {
   const s = S.settings;

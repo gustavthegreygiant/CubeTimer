@@ -35,8 +35,31 @@ function checkPBs(solves) {
     if (v == null || !isFinite(v)) continue;
     if (old == null || v < old) {
       hit.push(name);
-      pb[k] = { v, ts: Date.now(), solves: solves.slice(-PBN[k]).map(s => ({ t: s.finalTime, raw: s.rawTime, pen: s.penalty, sc: s.scramble })) };
+      pb[k] = { v, ts: solves[solves.length - 1].timestamp, solves: solves.slice(-PBN[k]).map(s => ({ t: s.finalTime, raw: s.rawTime, pen: s.penalty, sc: s.scramble })) };
     }
   }
   return hit;
+}
+
+// Recompute a cube's records from the solves that currently exist (all sessions of that cube).
+// Used after deleting solves, changing penalties or clearing a session, so a removed PB falls back to the previous best.
+// Returns the names of records that got better (e.g. a DNF being undone).
+function rebuildPBs(cube) {
+  const old = S.pbs[cube] || {}, pb = {};
+  for (const sess of S.sessions) {
+    if (sess.cube !== cube) continue;
+    const f = [];
+    sess.solves.forEach((s, i) => {
+      f.push(s.finalTime);
+      for (const [k] of PBK) {
+        const n = PBN[k];
+        if (f.length < n) continue;
+        const v = n === 1 ? s.finalTime : Stats.avg(f, n);
+        if (v == null || !isFinite(v)) continue;
+        if (!pb[k] || v < pb[k].v) pb[k] = { v, ts: s.timestamp, solves: sess.solves.slice(i - n + 1, i + 1).map(x => ({ t: x.finalTime, raw: x.rawTime, pen: x.penalty, sc: x.scramble })) };
+      }
+    });
+  }
+  S.pbs[cube] = pb;
+  return PBK.filter(([k]) => pb[k] && old[k] && pb[k].v < old[k].v).map(([, name]) => name);
 }

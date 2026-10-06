@@ -54,7 +54,7 @@ function recordSolve(raw, pen) {
 function setPenalty(p) {
   if (!T.last) return;
   T.last.penalty = p; T.last.finalTime = finalOf(T.last.rawTime, p);
-  const hit = checkPBs(cur().solves);
+  const hit = rebuildPBs(S.cube);
   save(); render();
   if (hit.length) celebrate(hit);
 }
@@ -62,6 +62,7 @@ function deleteSolve(id) {
   const sess = cur();
   sess.solves = sess.solves.filter(s => s.id !== id);
   if (T.last && T.last.id === id) T.last = null;
+  rebuildPBs(S.cube);
   save(); render();
 }
 
@@ -70,6 +71,7 @@ function render() {
   $('#ss').innerHTML = S.sessions.filter(x => x.cube === S.cube).map(x => `<option value="${x.id}" ${x.id === S.active[S.cube] ? 'selected' : ''}>${esc(x.name)} (${x.solves.length})</option>`).join('');
   const sv = cur().solves, f = sv.map(s => s.finalTime), sm = Stats.summary(f), a = v => v == null ? '—' : fmt(v);
   const cell = (l, v) => `<div><b>${v}</b><span>${l}</span></div>`;
+  $('#rc').innerHTML = sv.length ? sv.slice(-8).reverse().map((s, i) => `<span class="chip${i ? '' : ' new'}">${sd(s)}${s.penalty === '+2' ? '<i>+2</i>' : ''}</span>`).join('') : '<span class="mut">No solves yet</span>';
   $('#quick').innerHTML = cell('Ao5', a(sm.ao5)) + cell('Ao12', a(sm.ao12)) + cell('Best', a(sm.best));
   $('#st').innerHTML = cell('Solves', sm.n) + cell('Best', a(sm.best)) + cell('Worst', a(sm.worst)) + cell('Mean', a(sm.mean)) +
     cell('Ao5', a(sm.ao5)) + cell('Ao12', a(sm.ao12)) + cell('Ao50', a(sm.ao50)) + cell('Ao100', a(sm.ao100));
