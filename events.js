@@ -2,6 +2,7 @@
 const onTimer = () => document.body.dataset.view === 'timer';
 function showView(v) {
   document.body.dataset.view = v;
+  if (typeof syncWake === 'function') syncWake();
   document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
 }
 $('#nav').onclick = e => { const b = e.target.closest('button'), v = b && b.dataset.v; if (v && !ACT.has(T.s)) showView(v); };
@@ -28,15 +29,16 @@ document.addEventListener('click', e => { const b = e.target.closest('button'); 
 
 $('#tabs').onclick = e => { if (e.target.dataset.c) setCube(e.target.dataset.c); };
 $('#nsb').onclick = () => { if (idleish()) newScramble(); };
-$('#pbar').onclick = e => { if (e.target.dataset.star) { if (T.last) toggleStar(T.last.id); } else if (e.target.dataset.p !== undefined) setPenalty(e.target.dataset.p); };
+$('#pbar').onclick = e => { if (e.target.dataset.copy) copySolve('last'); else if (e.target.dataset.star) { if (T.last) toggleStar(T.last.id); } else if (e.target.dataset.p !== undefined) setPenalty(e.target.dataset.p); };
 $('#hist').onclick = e => {
   const d = e.target.dataset;
-  if (d.del) deleteSolve(d.del);
+  if (d.copy) copySolve(d.copy);
+  else if (d.del) deleteSolve(d.del);
   else if (d.star) toggleStar(d.star);
   else { const r = e.target.closest('tr[data-open]'); if (r) { openId = openId === r.dataset.open ? null : r.dataset.open; render(); } }
 };
-$('#pb').onclick = e => { const b = e.target.closest('[data-pb]'); if (b) { openPB = openPB === b.dataset.pb ? null : b.dataset.pb; render(); } };
-$('#hl').onclick = e => { if (e.target.dataset.star) toggleStar(e.target.dataset.star); };
+$('#pb').onclick = e => { const c = e.target.closest('[data-copypb]'); if (c) return copyPB(c.dataset.copypb); const b = e.target.closest('[data-pb]'); if (b) { openPB = openPB === b.dataset.pb ? null : b.dataset.pb; render(); } };
+$('#hl').onclick = e => { if (e.target.dataset.copy) copySolve(e.target.dataset.copy); else if (e.target.dataset.star) toggleStar(e.target.dataset.star); };
 $('#clr').onclick = async () => {
   if (!cur().solves.length || T.s === 'running') return;
   if (S.settings.confirmClear && !(await ask('Delete all solves in "' + cur().name + '"? This cannot be undone.'))) return;
@@ -59,7 +61,7 @@ $('#sd').onclick = async () => {
 $('#gear').onclick = () => {
   const s = S.settings;
   $('#s1').checked = s.insp; $('#s2').value = s.inspDur; $('#s3').value = s.disp; $('#s4').value = s.theme;
-  $('#s5').checked = s.sound; $('#s6').checked = s.confirmClear; $('#s7').value = s.orient; $('#s8').value = s.accent; $('#s9').value = s.tcolor; $('#s10').value = String(s.lock); $('#s11').checked = s.celebrate;
+  $('#s5').checked = s.sound; $('#s6').checked = s.confirmClear; $('#s7').value = s.orient; $('#s8').value = s.accent; $('#s9').value = s.tcolor; $('#s10').value = String(s.lock); $('#s11').checked = s.celebrate; $('#s12').checked = s.saver;
   $('#sdlg').showModal();
 };
 $('#sdlg').addEventListener('change', () => {
@@ -67,8 +69,9 @@ $('#sdlg').addEventListener('change', () => {
   s.insp = $('#s1').checked; s.inspDur = Math.min(60, Math.max(5, Math.round(+$('#s2').value) || 15));
   s.disp = $('#s3').value; s.theme = $('#s4').value; s.sound = $('#s5').checked; s.confirmClear = $('#s6').checked;
   const o = $('#s7').value, oc = o !== s.orient; s.orient = o;
-  s.accent = $('#s8').value; s.tcolor = $('#s9').value; s.lock = +$('#s10').value; s.celebrate = $('#s11').checked;
+  s.accent = $('#s8').value; s.tcolor = $('#s9').value; s.lock = +$('#s10').value; s.celebrate = $('#s11').checked; s.saver = $('#s12').checked;
   save(); applyTheme(); draw(); if (oc) applyOrientation(true);
+  if (typeof syncWake === 'function') syncWake();
 });
 
 $('#clrall').onclick = async () => {

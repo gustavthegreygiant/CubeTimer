@@ -28,7 +28,7 @@
     <div id="tz" class="tz" role="button" aria-label="Timer: hold, release to start, press to stop">
     <div id="tm" class="tm">0.00</div><div id="sub" class="sub"></div>
   </div>
-  <div id="pbar" hidden><button data-p="">OK</button><button data-p="+2">+2</button><button data-p="DNF">DNF</button><button data-star="1" aria-label="Star this solve">☆</button></div>
+  <div id="pbar" hidden><button data-p="">OK</button><button data-p="+2">+2</button><button data-p="DNF">DNF</button><button data-star="1" aria-label="Star this solve">☆</button><button data-copy="last" aria-label="Copy this solve"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg></button></div>
     <div class="recent" id="recent"><span class="rl">Recent</span><div id="rc"></div></div>
     <div class="quick" id="quick"></div>
   </section>
@@ -62,6 +62,8 @@
   <label>Accent color <select id="s8"><option value="blue">Blue</option><option value="green">Green</option><option value="purple">Purple</option><option value="orange">Orange</option><option value="pink">Pink</option><option value="teal">Teal</option></select></label>
   <label>Timer color <select id="s9"><option value="default">Default</option><option value="accent">Match accent</option><option value="blue">Blue</option><option value="green">Green</option><option value="purple">Purple</option><option value="orange">Orange</option><option value="pink">Pink</option><option value="teal">Teal</option></select></label>
   <label>Touch lock after solve <select id="s10"><option value="0">Off</option><option value="1">1 s</option><option value="1.5">1.5 s</option><option value="2">2 s</option><option value="3">3 s</option></select></label>
+  <label>Battery saver mode <input type="checkbox" id="s12"></label>
+  <p class="mut" style="margin:0 0 6px;font-size:13px">Off: the screen stays on while you are on the Timer tab (so it will not dim while you read a scramble). On: it may dim when you are not mid-solve. Your phone's own battery saver can still override this.</p>
   <label>Celebrate new PBs <input type="checkbox" id="s11"></label>
   <label>Orientation <select id="s7"><option value="auto">Auto (rotate freely)</option><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select></label>
   <label>Sound <input type="checkbox" id="s5"></label>

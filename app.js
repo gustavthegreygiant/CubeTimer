@@ -1,22 +1,31 @@
 /* App-like behaviour: focus mode + screen wake lock, fullscreen, install button, orientation lock */
 const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
-let focusOn = false, wake = null;
-
-// Called every frame from draw(): hides the chrome and keeps the screen awake while a solve is active.
+let focusOn = false, wake = null, acquiring = false, interacted = false, warned = false;
+// Screen stays awake during a solve, and also on the Timer tab unless Battery saver mode is ON.
+const wantAwake = () => document.visibilityState === 'visible' && (focusOn || (!S.settings.saver && document.body.dataset.view === 'timer'));
+async function syncWake() {
+  if (!navigator.wakeLock) return;
+  if (!wantAwake()) { try { if (wake) await wake.release(); } catch (e) {} wake = null; return; }
+  if (wake || acquiring) return;
+  acquiring = true;
+  try {
+    const w = await navigator.wakeLock.request('screen');
+    w.addEventListener('release', () => { if (wake === w) wake = null; });
+    if (wantAwake()) wake = w; else w.release();
+  } catch (e) {
+    if (interacted && !warned && !S.settings.saver) { warned = true; toast("Couldn't keep the screen on - is your phone's battery saver on?"); }
+  }
+  acquiring = false;
+}
 function setFocus(on) {
   if (on === focusOn) return;
   focusOn = on;
   document.body.classList.toggle('focus', on);
-  if (on) { lockScreen(); if (typeof stopCelebrate === 'function') stopCelebrate(); } else { try { if (wake) wake.release(); } catch (e) {} wake = null; }
+  if (on && typeof stopCelebrate === 'function') stopCelebrate();
+  syncWake();
 }
-async function lockScreen() {
-  try {
-    if (!navigator.wakeLock) return;
-    const w = await navigator.wakeLock.request('screen');
-    if (focusOn) wake = w; else w.release();
-  } catch (e) {}
-}
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && focusOn) lockScreen(); });
+document.addEventListener('visibilitychange', syncWake);
+addEventListener('pointerdown', () => { interacted = true; if (!wake) syncWake(); }, { passive: true });
 
 // Fullscreen (Android/desktop; hidden when unsupported or already installed)
 if (!document.documentElement.requestFullscreen || isStandalone()) $('#fs').hidden = true;
@@ -60,3 +69,5 @@ async function updateApp() {
   }
 }
 $('#upd').onclick = updateApp;
+
+syncWake();

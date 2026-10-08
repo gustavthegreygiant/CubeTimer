@@ -146,3 +146,9 @@ body.focus .recent{opacity:0;pointer-events:none}
 .nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;min-height:56px}
 .nav button *{pointer-events:none}
 @media (orientation:landscape) and (max-height:520px){.nav button{min-height:40px;flex-direction:row;gap:8px;font-size:14px}.recent{margin:2px 0}}
+
+/* ---- copy buttons ---- */
+button *{pointer-events:none}
+.cp{display:inline-flex;align-items:center;gap:6px;min-height:40px;margin-top:10px;padding:0 14px;color:var(--fg)}
+td .x[data-copy],.hlt .x[data-copy]{color:var(--mut)}
+.hlt .x[data-copy]{font-size:inherit}

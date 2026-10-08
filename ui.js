@@ -2,6 +2,7 @@
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let openId = null, openPB = null;
+const COPY_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></svg>';
 const sd = s => s.penalty === 'DNF' ? 'DNF' : fmt(s.finalTime);
 
 function inspCls() {  // blue = plenty of time, amber = last 3 s / +2 zone, red = DNF
@@ -81,14 +82,14 @@ function render() {
   $('#pb').innerHTML = PBK.map(([k, n]) => {
     const r = pbs[k]; let det = '';
     if (r && openPB === k) det = '<div class="det">' + (r.ts ? dt(r.ts) : 'Set before details were recorded') +
-      (r.solves || []).map((x, i) => `<div class="ds"><b>${r.solves.length > 1 ? (i + 1) + '. ' : ''}${x.pen === 'DNF' ? 'DNF' : fmt(x.t)}${x.pen === '+2' ? ' +2' : ''}</b>${sc(x.sc)}</div>`).join('') + '</div>';
+      (r.solves || []).map((x, i) => `<div class="ds"><b>${r.solves.length > 1 ? (i + 1) + '. ' : ''}${x.pen === 'DNF' ? 'DNF' : fmt(x.t)}${x.pen === '+2' ? ' +2' : ''}</b>${sc(x.sc)}</div>`).join('') + (k === 'single' && r.solves && r.solves[0] && r.solves[0].sc ? `<button class="cp" data-copypb="single">${COPY_ICON} Copy</button>` : '') + '</div>';
     return `<div class="pbw"><button class="pbr" data-pb="${k}" ${r ? '' : 'disabled'}><span>${n}</span><b>${a(r && r.v)}</b></button>${det}</div>`;
   }).join('');
   const hl = S.sessions.filter(x => x.cube === S.cube).flatMap(x => x.solves.filter(s => s.star).map(s => Object.assign({ sn: x.name }, s))).sort((p, q) => q.timestamp - p.timestamp);
-  $('#hl').innerHTML = hl.length ? hl.map(s => `<div class="hlr"><div class="hlt"><b>${sd(s)}</b><span class="mut">${dt(s.timestamp)} · ${esc(s.sn)}</span><button class="x" data-star="${s.id}" aria-label="Remove star">★</button></div>${sc(s.scramble)}</div>`).join('') : '<p class="mut">Tap ☆ after a solve (or in the history) to keep a good solve and its scramble here.</p>';
-  $('#hist').innerHTML = '<tr><th>#</th><th class="r">Time</th><th>Penalty</th><th></th><th></th></tr>' + (sv.length ? sv.map((s, i) =>
-    `<tr class="hr" data-open="${s.id}"><td>${i + 1}</td><td class="r">${sd(s)}</td><td>${s.penalty}</td><td><button class="x" data-star="${s.id}" aria-label="Star solve ${i + 1}">${s.star ? '★' : '☆'}</button></td><td class="r"><button class="x" data-del="${s.id}" aria-label="Delete solve ${i + 1}">×</button></td></tr>` +
-    (openId === s.id ? `<tr class="dtr"><td colspan="5">${dt(s.timestamp)}${sc(s.scramble)}</td></tr>` : '')).reverse().join('') : '<tr><td colspan="5" class="mut">No solves yet</td></tr>');
+  $('#hl').innerHTML = hl.length ? hl.map(s => `<div class="hlr"><div class="hlt"><b>${sd(s)}</b><span class="mut">${dt(s.timestamp)} · ${esc(s.sn)}</span><button class="x" data-copy="${s.id}" aria-label="Copy solve">${COPY_ICON}</button><button class="x" data-star="${s.id}" aria-label="Remove star">★</button></div>${sc(s.scramble)}</div>`).join('') : '<p class="mut">Tap ☆ after a solve (or in the history) to keep a good solve and its scramble here.</p>';
+  $('#hist').innerHTML = '<tr><th>#</th><th class="r">Time</th><th>Penalty</th><th></th><th></th><th></th></tr>' + (sv.length ? sv.map((s, i) =>
+    `<tr class="hr" data-open="${s.id}"><td>${i + 1}</td><td class="r">${sd(s)}</td><td>${s.penalty}</td><td><button class="x" data-star="${s.id}" aria-label="Star solve ${i + 1}">${s.star ? '★' : '☆'}</button></td><td><button class="x" data-copy="${s.id}" aria-label="Copy solve ${i + 1}">${COPY_ICON}</button></td><td class="r"><button class="x" data-del="${s.id}" aria-label="Delete solve ${i + 1}">×</button></td></tr>` +
+    (openId === s.id ? `<tr class="dtr"><td colspan="6">${dt(s.timestamp)}${sc(s.scramble)}</td></tr>` : '')).reverse().join('') : '<tr><td colspan="6" class="mut">No solves yet</td></tr>');
   const v = f.filter(x => x != null);
   if (v.length < 2) $('#gr').innerHTML = '<p class="mut">Complete 2+ solves to see the trend.</p>';
   else {
@@ -164,4 +165,31 @@ function celebrate(names) {
     }
     if (t < 4000) celebrate.raf = requestAnimationFrame(step); else g.clearRect(0, 0, c.width, c.height);
   })(t0);
+}
+
+/* ---- copy solve / PB single to the clipboard ---- */
+async function copyText(t) {
+  let ok = true;
+  try { await navigator.clipboard.writeText(t); }
+  catch (e) {
+    const a = document.createElement('textarea');
+    a.value = t; a.style.cssText = 'position:fixed;opacity:0;-webkit-user-select:text;user-select:text';
+    document.body.appendChild(a); a.select();
+    try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+    a.remove();
+  }
+  toast(ok ? 'Copied' : "Couldn't copy");
+}
+function copyBlock(head, t, pen, ts, sc) {
+  const time = pen === 'DNF' ? 'DNF' : fmt(t) + (pen === '+2' ? ' (+2)' : '');
+  return `${head}\nTime: ${time}\nDate: ${new Date(ts).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}\nScramble: ${sc}`;
+}
+function copySolve(id) {
+  let s = id === 'last' ? T.last : null;
+  for (const x of S.sessions) { if (s) break; s = x.solves.find(v => v.id === id) || null; }
+  if (s) copyText(copyBlock(CUBES[s.cubeType].label + ' solve', s.finalTime, s.penalty, s.timestamp, s.scramble));
+}
+function copyPB(k) {
+  const r = S.pbs[S.cube][k], x = r && r.solves && r.solves[0];
+  if (x) copyText(copyBlock(CUBES[S.cube].label + ' PB ' + k, x.t, x.pen, r.ts, x.sc));
 }
