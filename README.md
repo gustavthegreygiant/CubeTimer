@@ -1,6 +1,6 @@
 # Cube Timer
 
-A simple, fast speedcubing timer for **2x2, 3x3 and 4x4**. No build step, no backend, no account. Everything is stored in your browser and the app works offline once loaded.
+A simple, fast speedcubing timer for **2x2 to 7x7, Pyraminx, Skewb, Megaminx, Square-1, Clock and FTO**. No build step, no backend, no account. Everything is stored in your browser and the app works offline once loaded.
 
 ## Features
 - Algorithmic scrambles (2x2, 3x3, 4x4 with wide moves), kept separate from the UI

@@ -75,7 +75,7 @@ $('#sdlg').addEventListener('change', () => {
 });
 
 $('#clrall').onclick = async () => {
-  if (!(await ask('Delete ALL solves and personal records for 2×2, 3×3 and 4×4? Your sessions and settings are kept. This cannot be undone.', undefined, true))) return;
+  if (!(await ask('Delete ALL solves and personal records for every puzzle? Your sessions and settings are kept. This cannot be undone.', undefined, true))) return;
   S.sessions.forEach(x => { x.solves = []; });
   for (const c in CUBES) S.pbs[c] = {};
   openId = openPB = null; resetTimer(); save(); render();

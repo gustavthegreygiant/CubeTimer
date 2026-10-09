@@ -42,6 +42,7 @@ function newScramble() {
   scr = CUBES[S.cube].scramble();
   $('#scr').textContent = scr;
   $('#scr').classList.toggle('long', scr.length > 70);
+  $('#scr').classList.toggle('xl', scr.length > 160);
 }
 
 function recordSolve(raw, pen) {
@@ -69,6 +70,7 @@ function deleteSolve(id) {
 
 function render() {
   $('#tabs').innerHTML = Object.keys(CUBES).map(c => `<button data-c="${c}" class="${c === S.cube ? 'on' : ''}">${CUBES[c].label}</button>`).join('');
+  { const tb = $('#tabs'), on = tb.querySelector('.on'); if (on) tb.scrollLeft = on.offsetLeft - (tb.clientWidth - on.offsetWidth) / 2; }
   $('#ss').innerHTML = S.sessions.filter(x => x.cube === S.cube).map(x => `<option value="${x.id}" ${x.id === S.active[S.cube] ? 'selected' : ''}>${esc(x.name)} (${x.solves.length})</option>`).join('');
   const sv = cur().solves, f = sv.map(s => s.finalTime), sm = Stats.summary(f), a = v => v == null ? '—' : fmt(v);
   const cell = (l, v) => `<div><b>${v}</b><span>${l}</span></div>`;
